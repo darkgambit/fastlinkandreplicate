@@ -1,0 +1,48 @@
+Sub FastLinkDataAndReplicateValue()
+    Dim ws As Worksheet
+    Dim summarySheet As Worksheet
+    Dim pasteRow As Long
+    Dim r As Long, c As Long
+    Dim startRow As Long, endRow As Long
+    Dim startColData As Long, startColReplicate As Long
+
+    ' Speed optimization
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    Application.EnableEvents = False
+
+    Set summarySheet = ThisWorkbook.Sheets("Summary")
+    pasteRow = 2
+    startRow = 9
+    endRow = 83
+    startColData = 24 ' Column X
+    startColReplicate = 38 ' Column AL
+
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Name <> summarySheet.Name Then
+            ' Link A9:N83
+            For r = startRow To endRow
+                For c = 1 To 14
+                    summarySheet.Cells(pasteRow + (r - startRow), startColData + c - 1).Formula = _
+                        "='" & ws.Name & "'!" & ws.Cells(r, c).Address(False, False)
+                Next c
+            Next r
+
+            ' Replicate N6 value for 75 rows
+            For r = 0 To (endRow - startRow)
+                summarySheet.Cells(pasteRow + r, startColReplicate).Formula = _
+                    "='" & ws.Name & "'!N6"
+            Next r
+
+            pasteRow = pasteRow + (endRow - startRow + 1)
+        End If
+    Next ws
+
+    ' Restore settings
+    Application.Calculation = xlCalculationAutomatic
+    Application.EnableEvents = True
+    Application.ScreenUpdating = True
+
+    MsgBox "Data linked and replicated successfully!"
+End Sub
+
