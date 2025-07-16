@@ -1,0 +1,49 @@
+Sub FastFormatAndProtectSheets()
+    Dim ws As Worksheet
+    Dim pwd As String
+    Dim rng As Range
+
+    ' Optimization settings
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    Application.EnableEvents = False
+
+    pwd = "1" ' Password for protected sheets
+
+    For Each ws In ThisWorkbook.Worksheets
+        If LCase(ws.Name) <> "summary" Then
+            ws.Unprotect Password:=pwd
+            
+            ' Format the range
+            With ws.Range("D9:D80")
+                .NumberFormat = "mm/dd/yyyy"
+            End With
+            
+            ' Protect sheet with specific permissions
+            ws.Protect Password:=pwd, _
+                DrawingObjects:=True, _
+                Contents:=True, _
+                Scenarios:=True, _
+                AllowFormattingCells:=True, _
+                AllowFormattingColumns:=True, _
+                AllowFormattingRows:=True, _
+                AllowInsertingColumns:=True, _
+                AllowInsertingRows:=True, _
+                AllowInsertingHyperlinks:=True, _
+                AllowDeletingColumns:=False, _
+                AllowDeletingRows:=False, _
+                AllowSorting:=True, _
+                AllowFiltering:=True, _
+                AllowUsingPivotTables:=True
+        End If
+    Next ws
+
+    ' Restore settings
+    Application.ScreenUpdating = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.EnableEvents = True
+End Sub
+
+
+
+
