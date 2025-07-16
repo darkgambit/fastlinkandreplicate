@@ -1,0 +1,58 @@
+Sub ProtectSpecificRangesWithHiddenFormulas()
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim summarySheetNames As Variant
+    Dim i As Long
+
+    ' Sheet names to exclude from protection
+    summarySheetNames = Array("Summary") ' Add more if needed
+
+    ' Ranges to lock and hide formulas
+    Dim protectRanges As Variant
+    protectRanges = Array("A7:N8", "A9:A83", "H9:N83", "C92:f92","C86:M91", "O1:FP5000")
+
+    For Each ws In ThisWorkbook.Worksheets
+        ' Skip summary sheets
+        For i = LBound(summarySheetNames) To UBound(summarySheetNames)
+            If ws.Name = summarySheetNames(i) Then GoTo SkipSheet
+        Next i
+
+        On Error Resume Next
+        ws.Unprotect Password:="1"
+        On Error GoTo 0
+
+        ' Unlock all cells first
+        ws.Cells.Locked = False
+        ws.Cells.FormulaHidden = False
+
+        ' Lock and hide formulas in specified ranges
+        For i = LBound(protectRanges) To UBound(protectRanges)
+            On Error Resume Next
+            Set rng = ws.Range(protectRanges(i))
+            If Not rng Is Nothing Then
+                rng.Locked = True
+                rng.FormulaHidden = True
+            End If
+            Set rng = Nothing
+            On Error GoTo 0
+        Next i
+
+        ' Apply protection with permissions
+        ws.Protect Password:="1", _
+            AllowFormattingCells:=True, _
+            AllowFormattingColumns:=True, _
+            AllowFormattingRows:=True, _
+            AllowInsertingColumns:=True, _
+            AllowInsertingRows:=True, _
+            AllowInsertingHyperlinks:=True, _
+            AllowDeletingColumns:=False, _
+            AllowDeletingRows:=False, _
+            AllowSorting:=True, _
+            AllowFiltering:=True, _
+            AllowUsingPivotTables:=True
+
+SkipSheet:
+    Next ws
+
+    MsgBox "Protected ranges with formulas hidden on all non-summary sheets.", vbInformation
+End Sub
